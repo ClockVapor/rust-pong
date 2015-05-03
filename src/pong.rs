@@ -161,8 +161,11 @@ impl Pong {
         let mut ai_down = false;
 
         if self.ball.vel[0] > 0.0 {
-            if self.ball.pos[1] > self.p2.pos[1] { ai_down = true; }
-            else if self.ball.pos[1] < self.p2.pos[1] { ai_up = true; }
+            let t = (self.p2.pos[0] - self.ball.pos[0]) / self.ball.vel[0];
+            let target_y = self.ball.pos[1] + self.ball.vel[1] * t;
+
+            if target_y > self.p2.pos[1] { ai_down = true; }
+            else if target_y < self.p2.pos[1] { ai_up = true; }
         }
 
         (ai_up, ai_down)
