@@ -24,7 +24,9 @@ struct Pong {
     ball: GameObject,
     up: bool,
     down: bool,
-    server: Player
+    server: Player,
+    p1_score: u32,
+    p2_score: u32,
 }
 
 enum Player {
@@ -221,10 +223,16 @@ impl Pong {
         match player { 
             Player::Left => { 
                 self.server = Player::Right; 
+                self.p1_score += 1;
+                println!("Player 1 scored! {}-{}", self.p1_score,
+                    self.p2_score);
             }
 
             Player::Right => { 
                 self.server = Player::Left;
+                self.p2_score += 1;
+                println!("Player 2 scored! {}-{}", self.p1_score,
+                    self.p2_score);
             }
         }
 
@@ -245,7 +253,9 @@ pub fn play() {
         ball: GameObject { size: BALL_SIZE, ..Default::default() },
         up: false,
         down: false,
-        server: Player::Left
+        server: Player::Left,
+        p1_score: 0,
+        p2_score: 0,
     };
 
     pong.start();
