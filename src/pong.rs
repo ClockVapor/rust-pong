@@ -11,6 +11,7 @@ static SIZE: [u32; 2] = [512, 512];
 static PADDLE_SIZE: [f64; 2] = [8.0, 32.0];
 static PADDLE_ACCEL: f64 = 4000.0;
 static PADDLE_FRICTION: f64 = 0.5;
+static PADDLE_MAX_SPEED: f64 = 400.0;
 static BALL_SIZE: [f64; 2] = [8.0, 8.0];
 static BALL_START_MAX_ANGLE: f64 = 60.0;
 static BALL_START_SPEED: f64 = 250.0;
@@ -62,13 +63,7 @@ impl Pong {
     }
 
     fn update(&mut self, args: &UpdateArgs) {
-        let mut ai_up = false;
-        let mut ai_down = false;
-
-        if self.ball.vel[0] > 0.0 {
-            if self.ball.pos[1] > self.p2.pos[1] { ai_down = true; }
-            else if self.ball.pos[1] < self.p2.pos[1] { ai_up = true; }
-        }
+        let (ai_up, ai_down) = self.handle_ai_paddle();
 
         Pong::handle_paddle(&mut self.p1, self.up, self.down, args.dt);
         Pong::handle_paddle(&mut self.p2, ai_up, ai_down, args.dt);
@@ -153,21 +148,65 @@ impl Pong {
             if dv.abs() >= paddle.vel[1].abs() { paddle.vel[1] = 0.0; }
             else { paddle.vel[1] += dv; }
         }
+     
+        if paddle.vel[1] > PADDLE_MAX_SPEED { 
+            paddle.vel[1] = PADDLE_MAX_SPEED;
+        } else if paddle.vel[1] < -PADDLE_MAX_SPEED {
+            paddle.vel[1] = -PADDLE_MAX_SPEED;
+        }
+    }
+
+    fn handle_ai_paddle(&self) -> (bool, bool) {
+        let mut ai_up = false;
+        let mut ai_down = false;
+
+        if self.ball.vel[0] > 0.0 {
+            if self.ball.pos[1] > self.p2.pos[1] { ai_down = true; }
+            else if self.ball.pos[1] < self.p2.pos[1] { ai_up = true; }
+        }
+
+        (ai_up, ai_down)
     }
 
     fn handle_ball(&mut self) {
-        if self.ball.intersects(&self.p1) {
-            self.ball.vel[0] *= -1.0;
-            self.ball.vel[1] += self.p1.vel[1] * PADDLE_FRICTION;
-        }
+        for paddle in [&self.p1, &self.p2].iter() {
+            match self.ball.collision_normal(paddle) {
+                Some(normal) => {
+                    let dot = self.ball.vel[0] * normal[0] + 
+                        self.ball.vel[1] * normal[1];
 
-        if self.ball.intersects(&self.p2) {
-            self.ball.vel[0] *= -1.0;
-            self.ball.vel[1] += self.p2.vel[1] * PADDLE_FRICTION;
+                    // reflect ball's velocity off collision normal
+                    self.ball.vel = [
+                        self.ball.vel[0] - 2.0 * normal[0] * dot,
+                        self.ball.vel[1] - 2.0 * normal[1] * dot
+                    ];
+                    
+                    // apply a bit of paddle velocity to ball
+                    if normal[0] != 0.0 {
+                        self.ball.vel[1] += paddle.vel[1] * PADDLE_FRICTION;
+                    }
+
+                    Pong::correct_collision(&mut self.ball, paddle, normal);
+                }
+
+                None => {}
+            }
         }
 
         if self.ball.pos[0] > SIZE[0] as f64 { self.score(Player::Left); }
         else if self.ball.pos[0] < 0.0 { self.score(Player::Right); }
+    }
+
+    fn correct_collision(a: &mut GameObject, b: &GameObject, normal: [f64; 2]) {
+        if normal == [1.0, 0.0] {
+            a.pos[0] = b.pos[0] + b.size[0] / 2.0 + a.size[0] / 2.0;
+        } else if normal == [-1.0, 0.0] {
+            a.pos[0] = b.pos[0] - b.size[0] / 2.0 - a.size[0] / 2.0;
+        } else if normal == [0.0, 1.0] {
+            a.pos[1] = b.pos[1] + b.size[1] / 2.0 + a.size[1] / 2.0;
+        } else if normal == [0.0, -1.0] {
+            a.pos[1] = b.pos[1] - b.size[1] / 2.0 - a.size[1] / 2.0;
+        }
     }
 
     fn score(&mut self, player: Player) {
