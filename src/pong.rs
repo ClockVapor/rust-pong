@@ -14,7 +14,8 @@ static PADDLE_FRICTION: f64 = 0.5;
 static PADDLE_MAX_SPEED: f64 = 400.0;
 static BALL_SIZE: [f64; 2] = [8.0, 8.0];
 static BALL_START_MAX_ANGLE: f64 = 60.0;
-static BALL_START_SPEED: f64 = 250.0;
+static BALL_START_SPEED: f64 = 200.0;
+static BALL_SPEED_INCREMENT: f64 = 25.0;
 
 struct Pong {
     gl: GlGraphics,
@@ -184,10 +185,14 @@ impl Pong {
                         self.ball.vel[1] - 2.0 * normal[1] * dot
                     ];
                     
-                    // apply a bit of paddle velocity to ball
+                    // apply a bit of paddle y velocity to ball
                     if normal[0] != 0.0 {
                         self.ball.vel[1] += paddle.vel[1] * PADDLE_FRICTION;
                     }
+
+                    // increment ball x velocity a bit
+                    self.ball.vel[0] += BALL_SPEED_INCREMENT *
+                        self.ball.vel[0].signum();
 
                     Pong::correct_collision(&mut self.ball, paddle, normal);
                 }
