@@ -41,27 +41,16 @@ impl Pong {
         const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
         const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
         
-        let p1_rect = [0.0, 0.0, self.p1.size[0], self.p1.size[1]]; 
-        let p2_rect = [0.0, 0.0, self.p2.size[0], self.p2.size[1]]; 
-        let ball_rect = [0.0, 0.0, self.ball.size[0], self.ball.size[1]]; 
-        let ball = &mut self.ball;
-        let p1 = &mut self.p1;
-        let p2 = &mut self.p2;
-
+        let objs = [&mut self.p1, &mut self.p2, &mut self.ball];
         self.gl.draw(args.viewport(), |c, gl| {
             clear(BLACK, gl);
 
-            let transform = c.transform.trans(ball.pos[0], ball.pos[1])
-                .trans(-ball.size[0]/2.0, -ball.size[1]/2.0);
-            rectangle(WHITE, ball_rect, transform, gl);
-
-            let transform = c.transform.trans(p1.pos[0], p1.pos[1])
-                .trans(-p1.size[0]/2.0, -p1.size[1]/2.0);
-            rectangle(WHITE, p1_rect, transform, gl);
-
-            let transform = c.transform.trans(p2.pos[0], p2.pos[1])
-                .trans(-p2.size[0]/2.0, -p2.size[1]/2.0);
-            rectangle(WHITE, p2_rect, transform, gl);
+            for obj in objs.iter() {
+                let rect = [0.0, 0.0, obj.size[0], obj.size[1]];
+                let transform = c.transform.trans(obj.pos[0], obj.pos[1])
+                    .trans(-obj.size[0] / 2.0, -obj.size[1] / 2.0);
+                rectangle(WHITE, rect, transform, gl);
+            }
         });
     }
 
