@@ -41,7 +41,7 @@ impl Pong {
         const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
         const WHITE: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
         
-        let objs = [&mut self.p1, &mut self.p2, &mut self.ball];
+        let objs = [&self.p1, &self.p2, &self.ball];
         self.gl.draw(args.viewport(), |c, gl| {
             clear(BLACK, gl);
 
