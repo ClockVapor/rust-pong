@@ -230,7 +230,6 @@ impl Pong {
 }
 
 pub fn play() {
-
     let window = Window::new(OPENGL_VERSION,
         WindowSettings::new("pong", SIZE)
         .exit_on_esc(true));

@@ -1,6 +1,6 @@
 [root]
 name = "pong"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "piston 0.1.1 (git+https://github.com/PistonDevelopers/piston.git)",
  "piston2d-graphics 0.0.44 (git+https://github.com/PistonDevelopers/graphics.git)",
