@@ -17,7 +17,7 @@ impl GameObject {
     pub fn collision_normal(&self, other: &GameObject) -> Option<[f64; 2]> {
         if self.intersects(other) {
             let dx = (self.pos[0] - other.pos[0]).abs();
-            let dy = (self.pos[0] - other.pos[0]).abs();
+            let dy = (self.pos[1] - other.pos[1]).abs();
 
             if dx <= dy {
                 if self.pos[0] <= other.pos[0] { Some([-1.0, 0.0]) }
